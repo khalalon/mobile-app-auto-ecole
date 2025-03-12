@@ -7,7 +7,7 @@ interface Props {
   clients: Client[];
   onEdit: (client: Client) => void;
   onDelete: (client: Client) => void;
-  onSelect: (client: Client) => void; // New prop for selecting a client
+  onSelect: (client: Client) => void; 
 }
 
 export default function ClientList({ clients, onEdit, onDelete, onSelect }: Props) {
