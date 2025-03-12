@@ -4,7 +4,6 @@ import { Client, createClient, getClients, updateClient, deleteClient } from "..
 import ClientList from "../../componenets/ClientList";
 import ClientForm from "../../componenets/ClientForm";
 import ClientDetails from "../../componenets/ClientDetails";
-import { PlusCircleIcon } from 'lucide-react-native';
 
 export default function ClientsScreen() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -18,7 +17,6 @@ export default function ClientsScreen() {
     fetchClients();
   }, []);
 
-  // Memoize filtered clients based on the search query and the list of clients
   const filteredClients = useMemo(() => {
     return clients.filter(client => 
       client.nom.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -59,22 +57,37 @@ export default function ClientsScreen() {
   };
 
   const handleDelete = async (client: Client) => {
-    setIsLoading(true);
-    try {
-      await deleteClient(client.cin);
-      fetchClients();
-      setSelectedClient(undefined);
-    } catch {
-      Alert.alert("Erreur", "Impossible de supprimer le client.");
-    } finally {
-      setIsLoading(false);
-    }
+    Alert.alert(
+      "Confirmer la suppression",
+      "Êtes-vous sûr de vouloir supprimer ce client ?",
+      [
+        { text: "Annuler", style: "cancel" },
+        { text: "Supprimer", onPress: async () => {
+            setIsLoading(true);
+            try {
+              await deleteClient(client.cin);
+              fetchClients();
+              setSelectedClient(undefined);
+            } catch {
+              Alert.alert("Erreur", "Impossible de supprimer le client.");
+            } finally {
+              setIsLoading(false);
+            }
+          }, style: "destructive" 
+        }
+      ]
+    );
   };
 
-  // Prevent unnecessary re-renders when the search query changes
   const handleSearchChange = useCallback((text: string) => {
     setSearchQuery(text);
   }, []);
+
+  const handleClientSelect = (client: Client) => {
+    setShowForm(false);
+    setEditingClient(undefined);
+    setSelectedClient(client);
+  };
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -83,57 +96,65 @@ export default function ClientsScreen() {
           Liste des clients
         </Text>
 
-        {/* Search Bar */}
-        {!selectedClient && (
+        {!selectedClient && !showForm && (
           <View className="mx-4 mb-4">
             <TextInput
               className="border border-gray-200 rounded-xl bg-white px-4 py-3"
               placeholder="Rechercher un client..."
               value={searchQuery}
-              onChangeText={handleSearchChange} // Use the memoized handler
+              onChangeText={handleSearchChange}
             />
           </View>
         )}
 
-        {/* Show ClientForm if button is clicked */}
-        {showForm && (
+        {showForm ? (
           <ClientForm 
             initialData={editingClient} 
             onSubmit={handleSubmit} 
             isEditing={!!editingClient} 
           />
-        )}
-
-        {/* Toggle between Details and List */}
-        {selectedClient ? (
+        ) : selectedClient ? (
           <ClientDetails 
             client={selectedClient} 
             onClose={() => setSelectedClient(undefined)} 
+            onEdit={(client) => {
+              setEditingClient(client);
+              setShowForm(true);
+              setSelectedClient(undefined);
+            }}
+            onDelete={handleDelete}
           />
-        ) : isLoading ? (
-          <ActivityIndicator size="large" className="mt-4" />
         ) : (
-          <View className="mx-4">
-            <ClientList 
-              clients={filteredClients} 
-              onEdit={(client) => {
-                setEditingClient(client);
-                setShowForm(true);
-              }} 
-              onDelete={handleDelete}
-              onSelect={setSelectedClient}
-            />
-          </View>
+          !showForm && (
+            <View className="mx-4">
+              {isLoading ? (
+                <ActivityIndicator size="large" className="mt-4" />
+              ) : (
+                <ClientList 
+                  clients={filteredClients} 
+                  onEdit={(client) => {
+                    setEditingClient(client);
+                    setShowForm(true);
+                    setSelectedClient(undefined);
+                  }} 
+                  onDelete={handleDelete}
+                  onSelect={handleClientSelect}
+                />
+              )}
+            </View>
+          )
         )}
       </ScrollView>
 
-      {/* Floating Add Client Button */}
       {!selectedClient && (
         <TouchableOpacity 
-          className="absolute bottom-6 right-6 bg-blue-600 rounded-full p-4 shadow-lg"
+          className="absolute bottom-6 right-6 bg-blue-600 rounded-full shadow-lg"
           onPress={() => setShowForm(!showForm)}
+          style={{ width: 64, height: 64, justifyContent: "center", alignItems: "center" }}
         >
-          <PlusCircleIcon size={24} color="white" />
+          <Text className="text-white text-4xl font-bold text-center">
+            {showForm ? "←" : "+"}
+          </Text>
         </TouchableOpacity>
       )}
     </View>

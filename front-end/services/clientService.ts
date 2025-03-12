@@ -13,9 +13,15 @@ export interface Client {
 
 // Fetch all clients
 export const getClients = async () => {
-  const response = await axiosInstance.get<Client[]>("/clients");
-  return response.data;
+  try {
+    const response = await axiosInstance.get<Client[]>("/clients");
+    return response.data;
+  } catch (error) {
+    console.error("Erreur lors de la récupération des clients :", error);
+    throw error; 
+  }
 };
+
 
 // Create a new client
 export const createClient = async (client: Client) => {
