@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { View, TextInput, TouchableOpacity, Text } from "react-native";
+import { View, TextInput, TouchableOpacity, Text, KeyboardAvoidingView } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { Examen } from "../../types/types";
 
@@ -44,19 +44,20 @@ export default function ExamenForm({ initialData, onSubmit, isEditing = false }:
     const examenToSubmit: Examen = {
       clientCin: examen.clientCin,
       clientNom: examen.clientNom,
-      dateExamen: `${examen.dateExamen}T00:00:00Z`, // Ensure ISO format for backend
+      dateExamen: `${examen.dateExamen}T00:00:00Z`,
       statutPaiement: examen.statutPaiement,
       coutExamen: parseFloat(examen.coutExamen.toString()) || 0,
       typeExamen: examen.typeExamen,
     };
     if (isEditing && examen.id) {
-      examenToSubmit.id = examen.id; // Include id only for updates
+      examenToSubmit.id = examen.id;
     }
     console.log("Submitting:", examenToSubmit);
     onSubmit(examenToSubmit);
   };
 
   return (
+    <KeyboardAvoidingView>
     <View className="flex-1 bg-gray-50 p-6">
       <View className="bg-white rounded-2xl shadow-md p-6">
         <Text className="text-2xl font-semibold text-gray-800 mb-4">
@@ -69,6 +70,7 @@ export default function ExamenForm({ initialData, onSubmit, isEditing = false }:
           onChangeText={(text) => handleChange("clientCin", text)}
           placeholder="CIN du client"
           keyboardType="numeric"
+          maxLength={8}
         />
 
         <TextInput
@@ -118,40 +120,29 @@ export default function ExamenForm({ initialData, onSubmit, isEditing = false }:
 
         <Text className="text-gray-600 mb-2">Statut de paiement</Text>
         <View className="flex-row justify-between mb-5 -mx-2">
-          <TouchableOpacity
-            className={`flex-1 py-3 rounded-xl mx-2 ${
-              examen.statutPaiement === "Payé" ? "bg-green-500" : "bg-gray-200"
-            }`}
-            onPress={() => handleChange("statutPaiement", "Payé")}
-          >
-            <Text
-              className={`text-center font-medium ${
-                examen.statutPaiement === "Payé" ? "text-white" : "text-gray-700"
+          {["Payé", "Non Payé"].map((status) => (
+            <TouchableOpacity
+              key={status}
+              className={`flex-1 py-3 rounded-xl mx-2 ${
+                examen.statutPaiement === status ? (status === "Payé" ? "bg-green-500" : "bg-red-500") : "bg-gray-200"
               }`}
+              onPress={() => handleChange("statutPaiement", status)}
             >
-              Payé
-            </Text>
-          </TouchableOpacity>
-          <TouchableOpacity
-            className={`flex-1 py-3 rounded-xl mx-2 ${
-              examen.statutPaiement === "Non Payé" ? "bg-red-500" : "bg-gray-200"
-            }`}
-            onPress={() => handleChange("statutPaiement", "Non Payé")} // FIXED HERE
-          >
-            <Text
-              className={`text-center font-medium ${
-                examen.statutPaiement === "Non Payé" ? "text-white" : "text-gray-700"
-              }`}
-            >
-              Non Payé
-            </Text>
-          </TouchableOpacity>
+              <Text
+                className={`text-center font-medium ${
+                  examen.statutPaiement === status ? "text-white" : "text-gray-700"
+                }`}
+              >
+                {status}
+              </Text>
+            </TouchableOpacity>
+          ))}
         </View>
 
         <TextInput
           className="border border-gray-200 rounded-xl bg-gray-50 text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:bg-white px-4 py-3 mb-5"
           value={examen.coutExamen.toString()}
-          onChangeText={(text) => handleChange("coutExamen", Number(text) || 0)} // FIXED HERE
+          onChangeText={(text) => handleChange("coutExamen", Number(text) || 0)}
           placeholder="Coût de l'examen (TND)"
           keyboardType="numeric"
         />
@@ -166,5 +157,6 @@ export default function ExamenForm({ initialData, onSubmit, isEditing = false }:
         </TouchableOpacity>
       </View>
     </View>
+  </KeyboardAvoidingView>
   );
 }

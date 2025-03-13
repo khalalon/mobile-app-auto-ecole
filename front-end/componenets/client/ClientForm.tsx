@@ -40,6 +40,7 @@ export default function ClientForm({ initialData, onSubmit, isEditing = false }:
             onChangeText={(text) => handleChange("cin", text)}
             placeholder="CIN"
             keyboardType="numeric"
+            maxLength={8}
           />
           <TextInput
             className="border border-gray-200 rounded-xl bg-gray-50 text-gray-800 placeholder-gray-400 focus:border-blue-400 focus:bg-white px-4 py-3 mb-4"

@@ -74,7 +74,7 @@ export default function ExamenDetails({ examen, onClose, onEdit, onDelete }: Exa
         <InfoItem label="Date:" value={examen.dateExamen} />
         <InfoItem label="Type:" value={examen.typeExamen} />
         <InfoItem label="Statut Paiement:" value={examen.statutPaiement} />
-        <InfoItem label="Coût:" value={`${examen.coutExamen} €`} />
+        <InfoItem label="Coût:" value={`${examen.coutExamen} TND`} />
         {examen.createdAt && (
           <InfoItem
             label="Créé le:"

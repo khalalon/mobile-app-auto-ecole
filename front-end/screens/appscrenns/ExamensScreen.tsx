@@ -4,11 +4,11 @@ import { getExamens, createExamen, updateExamen, deleteExamen } from "../../serv
 import ExamenList from "../../componenets/exam/ExamenList";
 import ExamenForm from "../../componenets/exam/ExamenForm";
 import ExamenDetails from "../../componenets/exam/ExamenDetails";
-import { Examen } from "../../types/types"; // Import the Examen type
+import { Examen } from "../../types/types";
 
 export default function ExamensScreen() {
   const [examens, setExamens] = useState<Examen[]>([]);
-  const [filteredExamens, setFilteredExamens] = useState<Examen[]>([]); // New state for filtered list
+  const [filteredExamens, setFilteredExamens] = useState<Examen[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [editingExamen, setEditingExamen] = useState<Examen | undefined>(undefined);
   const [selectedExamen, setSelectedExamen] = useState<Examen | undefined>(undefined);
@@ -24,7 +24,7 @@ export default function ExamensScreen() {
     try {
       const fetchedExamens = await getExamens();
       setExamens(fetchedExamens);
-      setFilteredExamens(fetchedExamens); // Initialize filtered list with all examens
+      setFilteredExamens(fetchedExamens);
     } catch {
       Alert.alert("Erreur", "Impossible de récupérer les examens.");
     } finally {
@@ -44,7 +44,6 @@ export default function ExamensScreen() {
       setEditingExamen(undefined);
       setShowForm(false);
     } catch (error) {
-      console.log(error);
       Alert.alert("Erreur", "Action impossible.");
     } finally {
       setIsLoading(false);
@@ -67,10 +66,9 @@ export default function ExamensScreen() {
   const handleSearchChange = useCallback((text: string) => {
     setSearchQuery(text);
     if (text.trim() === "") {
-      setFilteredExamens(examens); // Reset to full list if query is empty
+      setFilteredExamens(examens);
     } else {
       const filtered = examens.filter((examen) =>
-        // Adjust the fields you want to search on (e.g., clientNom, typeExamen)
         `${examen.clientNom || ""} ${examen.clientCin} ${examen.typeExamen}`
           .toLowerCase()
           .includes(text.toLowerCase())
@@ -117,7 +115,7 @@ export default function ExamensScreen() {
                 <ActivityIndicator size="large" className="mt-4" />
               ) : (
                 <ExamenList
-                  examens={filteredExamens} // Use filtered list instead of full list
+                  examens={filteredExamens}
                   onEdit={(examen: Examen) => {
                     setEditingExamen(examen);
                     setShowForm(true);
