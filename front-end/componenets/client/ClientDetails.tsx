@@ -1,6 +1,6 @@
 import React from "react";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
-import { Client } from "../../services/clientService";
+import { Client } from "../../types/types";
 import { Edit3, Trash2, X } from "lucide-react-native";
 
 interface Props {

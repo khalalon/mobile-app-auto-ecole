@@ -1,17 +1,5 @@
-// ExamenServices.ts
 import axiosInstance from "../axiosInstance";
-
-export interface Examen {
-  id?: string;
-  clientCin: string;
-  clientNom?: string ;
-  dateExamen: string;
-  statutPaiement: "Payé" | "Non Payé";
-  coutExamen: number;
-  typeExamen: "CODE" | "MANOEUVRE" | "PARC";
-  createdAt?: string;
-  updatedAt?: string;
-}
+import { Examen } from "../types/types"; // Import Examen from types
 
 // Fetch all examens
 export const getExamens = async () => {

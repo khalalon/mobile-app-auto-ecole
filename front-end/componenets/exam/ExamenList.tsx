@@ -21,7 +21,7 @@ const ExamenList: React.FC<ExamenListProps> = ({ examens, onEdit, onDelete, onSe
       <Text className="text-gray-600">Date: {item.dateExamen}</Text>
       <Text className="text-gray-600">Type: {item.typeExamen}</Text>
       <Text className="text-gray-600">Statut Paiement: {item.statutPaiement}</Text>
-      <Text className="text-gray-600">Coût: {item.coutExamen} €</Text>
+      <Text className="text-gray-600">Coût: {item.coutExamen} TND</Text>
     </TouchableOpacity>
   );
 

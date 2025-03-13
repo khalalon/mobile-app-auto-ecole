@@ -1,8 +1,8 @@
 // components/ClientList.tsx
 import React from "react";
 import { View, Text, FlatList, TouchableOpacity } from "react-native";
-import { Client } from "../../services/clientService";
-import { Ionicons } from "@expo/vector-icons";
+import { Client } from "../../types/types";
+
 
 interface Props {
   clients: Client[];

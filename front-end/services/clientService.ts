@@ -1,15 +1,6 @@
 import axiosInstance from "../axiosInstance";
+import { Client } from "../types/types";
 
-export interface Client {
-  cin: string;
-  nom: string;
-  prenom: string;
-  dateNaissance: string;
-  sexe: "M" | "F";
-  telephone: string;
-  createdAt?: string;
-  updatedAt?: string;
-}
 
 // Fetch all clients
 export const getClients = async () => {

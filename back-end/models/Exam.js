@@ -23,7 +23,7 @@ const Examen = sequelize.define("Examen", {
     allowNull: true,
   },
   dateExamen: {
-    type: DataTypes.DATE,
+    type: DataTypes.DATEONLY,
     allowNull: false,
   },
   statutPaiement: {
@@ -35,7 +35,7 @@ const Examen = sequelize.define("Examen", {
     allowNull: false,
   },
   typeExamen: {
-    type: DataTypes.ENUM("CODE", "MANOEUVRE", "PARC"),
+    type: DataTypes.ENUM("Code", "Conduit", "Parc"),
     allowNull: false,
   },
 });

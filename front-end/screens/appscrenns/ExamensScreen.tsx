@@ -1,4 +1,3 @@
-// screens/appscrenns/ExamensScreen.tsx
 import React, { useEffect, useState, useCallback } from "react";
 import { Text, Alert, ActivityIndicator, TextInput, View, TouchableOpacity, ScrollView } from "react-native";
 import { getExamens, createExamen, updateExamen, deleteExamen } from "../../services/ExamenServices";
@@ -9,6 +8,7 @@ import { Examen } from "../../types/types"; // Import the Examen type
 
 export default function ExamensScreen() {
   const [examens, setExamens] = useState<Examen[]>([]);
+  const [filteredExamens, setFilteredExamens] = useState<Examen[]>([]); // New state for filtered list
   const [isLoading, setIsLoading] = useState(false);
   const [editingExamen, setEditingExamen] = useState<Examen | undefined>(undefined);
   const [selectedExamen, setSelectedExamen] = useState<Examen | undefined>(undefined);
@@ -24,6 +24,7 @@ export default function ExamensScreen() {
     try {
       const fetchedExamens = await getExamens();
       setExamens(fetchedExamens);
+      setFilteredExamens(fetchedExamens); // Initialize filtered list with all examens
     } catch {
       Alert.alert("Erreur", "Impossible de récupérer les examens.");
     } finally {
@@ -42,7 +43,8 @@ export default function ExamensScreen() {
       fetchExamens();
       setEditingExamen(undefined);
       setShowForm(false);
-    } catch {
+    } catch (error) {
+      console.log(error);
       Alert.alert("Erreur", "Action impossible.");
     } finally {
       setIsLoading(false);
@@ -50,27 +52,32 @@ export default function ExamensScreen() {
   };
 
   const handleDelete = async (examen: Examen) => {
-    Alert.alert("Confirmer la suppression", "Êtes-vous sûr de vouloir supprimer cet examen ?", [
-      { text: "Annuler", style: "cancel" },
-      { text: "Supprimer", onPress: async () => {
-          setIsLoading(true);
-          try {
-            await deleteExamen(examen.id!);
-            fetchExamens();
-            setSelectedExamen(undefined);
-          } catch {
-            Alert.alert("Erreur", "Impossible de supprimer l'examen.");
-          } finally {
-            setIsLoading(false);
-          }
-        }, style: "destructive"
-      }
-    ]);
+    setIsLoading(true);
+    try {
+      await deleteExamen(examen.id!);
+      fetchExamens();
+      setSelectedExamen(undefined);
+    } catch {
+      Alert.alert("Erreur", "Impossible de supprimer l'examen.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSearchChange = useCallback((text: string) => {
     setSearchQuery(text);
-  }, []);
+    if (text.trim() === "") {
+      setFilteredExamens(examens); // Reset to full list if query is empty
+    } else {
+      const filtered = examens.filter((examen) =>
+        // Adjust the fields you want to search on (e.g., clientNom, typeExamen)
+        `${examen.clientNom || ""} ${examen.clientCin} ${examen.typeExamen}`
+          .toLowerCase()
+          .includes(text.toLowerCase())
+      );
+      setFilteredExamens(filtered);
+    }
+  }, [examens]);
 
   return (
     <View className="flex-1 bg-gray-100">
@@ -93,7 +100,10 @@ export default function ExamensScreen() {
         {showForm ? (
           <ExamenForm initialData={editingExamen} onSubmit={handleSubmit} isEditing={!!editingExamen} />
         ) : selectedExamen ? (
-          <ExamenDetails examen={selectedExamen} onClose={() => setSelectedExamen(undefined)} onEdit={(examen: Examen) => {
+          <ExamenDetails
+            examen={selectedExamen}
+            onClose={() => setSelectedExamen(undefined)}
+            onEdit={(examen: Examen) => {
               setEditingExamen(examen);
               setShowForm(true);
               setSelectedExamen(undefined);
@@ -106,7 +116,9 @@ export default function ExamensScreen() {
               {isLoading ? (
                 <ActivityIndicator size="large" className="mt-4" />
               ) : (
-                <ExamenList examens={examens} onEdit={(examen: Examen) => {
+                <ExamenList
+                  examens={filteredExamens} // Use filtered list instead of full list
+                  onEdit={(examen: Examen) => {
                     setEditingExamen(examen);
                     setShowForm(true);
                     setSelectedExamen(undefined);
@@ -121,9 +133,11 @@ export default function ExamensScreen() {
       </ScrollView>
 
       {!selectedExamen && (
-        <TouchableOpacity className="absolute bottom-6 right-6 bg-blue-600 rounded-full shadow-lg"
+        <TouchableOpacity
+          className="absolute bottom-6 right-6 bg-blue-500 rounded-full shadow-lg"
           onPress={() => setShowForm(!showForm)}
-          style={{ width: 64, height: 64, justifyContent: "center", alignItems: "center" }}>
+          style={{ width: 64, height: 64, justifyContent: "center", alignItems: "center" }}
+        >
           <Text className="text-white text-4xl font-bold text-center">
             {showForm ? "×" : "+"}
           </Text>

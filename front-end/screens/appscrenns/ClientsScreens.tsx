@@ -1,9 +1,10 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Text, Alert, ActivityIndicator, TextInput, View, TouchableOpacity, ScrollView } from "react-native";
-import { Client, createClient, getClients, updateClient, deleteClient } from "../../services/clientService";
+import { createClient, getClients, updateClient, deleteClient } from "../../services/clientService";
 import ClientList from "../../componenets/client/ClientList";
 import ClientForm from "../../componenets/client/ClientForm";
 import ClientDetails from "../../componenets/client/ClientDetails";
+import { Client } from "../../types/types";
 
 export default function ClientsScreen() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -49,7 +50,8 @@ export default function ClientsScreen() {
       fetchClients();
       setEditingClient(undefined);
       setShowForm(false);
-    } catch {
+    } catch(error) {
+      console.log(error)
       Alert.alert("Erreur", "Action impossible.");
     } finally {
       setIsLoading(false);
@@ -148,7 +150,7 @@ export default function ClientsScreen() {
 
       {!selectedClient && (
         <TouchableOpacity 
-          className="absolute bottom-6 right-6 bg-blue-600 rounded-full shadow-lg"
+          className="absolute bottom-6 right-6 bg-blue-500 rounded-full shadow-lg"
           onPress={() => setShowForm(!showForm)}
           style={{ width: 64, height: 64, justifyContent: "center", alignItems: "center" }}
         >
