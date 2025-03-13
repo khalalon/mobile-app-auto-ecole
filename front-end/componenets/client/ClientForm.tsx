@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { View, TextInput, TouchableOpacity, Text } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import { Client } from "../services/clientService";
+import { Client } from "../../services/clientService";
 
 interface Props {
   initialData?: Client;

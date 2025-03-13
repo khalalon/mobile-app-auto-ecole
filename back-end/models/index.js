@@ -2,13 +2,18 @@ const sequelize = require("../config/database");
 const Client = require("./Client");
 const Exam = require("./Exam");
 const Session = require("./Session");
+
+// Ensure relationships are established
+Client.hasMany(Exam, { foreignKey: "clientCin" });
+Exam.belongsTo(Client, { foreignKey: "clientCin" });
+
 const syncDatabase = async () => {
   try {
-    await sequelize.sync({ alter: true }); // This updates the tables if needed
-    console.log("Database synced successfully!");
+    await sequelize.sync({ alter: true }); // Apply schema updates
+    console.log("Database synchronized");
   } catch (error) {
-    console.error("Database sync failed:", error);
+    console.error("Error syncing database:", error);
   }
 };
 
-module.exports = { syncDatabase, Client, Exam, Session };
+module.exports = { Client, Exam, syncDatabase };

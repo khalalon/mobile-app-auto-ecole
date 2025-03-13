@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useMemo, useCallback } from "react";
 import { Text, Alert, ActivityIndicator, TextInput, View, TouchableOpacity, ScrollView } from "react-native";
 import { Client, createClient, getClients, updateClient, deleteClient } from "../../services/clientService";
-import ClientList from "../../componenets/ClientList";
-import ClientForm from "../../componenets/ClientForm";
-import ClientDetails from "../../componenets/ClientDetails";
+import ClientList from "../../componenets/client/ClientList";
+import ClientForm from "../../componenets/client/ClientForm";
+import ClientDetails from "../../componenets/client/ClientDetails";
 
 export default function ClientsScreen() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -153,8 +153,9 @@ export default function ClientsScreen() {
           style={{ width: 64, height: 64, justifyContent: "center", alignItems: "center" }}
         >
           <Text className="text-white text-4xl font-bold text-center">
-            {showForm ? "←" : "+"}
+           {showForm ? "×" : "+"}
           </Text>
+
         </TouchableOpacity>
       )}
     </View>
