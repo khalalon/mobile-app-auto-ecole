@@ -1,19 +1,44 @@
-const sequelize = require("../config/database");
-const Client = require("./Client");
-const Exam = require("./Exam");
-const Session = require("./Session");
+const { initializeDatabase } = require("../config/database");
+const ClientModel = require("./Client");
+const ExamModel = require("./Exam");
 
-// Ensure relationships are established
-Client.hasMany(Exam, { foreignKey: "clientCin" });
-Exam.belongsTo(Client, { foreignKey: "clientCin" });
+let models = {};
+let initialized = false;
 
-const syncDatabase = async () => {
-  try {
-    await sequelize.sync({ alter: true }); // Apply schema updates
-    console.log("Database synchronized");
-  } catch (error) {
-    console.error("Error syncing database:", error);
+async function setupDatabase() {
+  console.log("Setting up database");
+  const sequelize = await initializeDatabase();
+
+  if (!initialized) {
+    // Initialize models
+    console.log("Initializing Client model");
+    models.Client = ClientModel(sequelize);
+    console.log("Client model initialized:", typeof models.Client, models.Client.name);
+
+    console.log("Initializing Exam model");
+    models.Exam = ExamModel(sequelize);
+    console.log("Exam model initialized:", typeof models.Exam, models.Exam.name);
+
+    // Define relationships
+    console.log("Defining model relationships");
+    try {
+      models.Client.hasMany(models.Exam, { foreignKey: "clientCin", as: "exams" });
+      models.Exam.belongsTo(models.Client, { foreignKey: "clientCin", as: "client" });
+      console.log("Relationships defined successfully");
+    } catch (error) {
+      console.error("Error defining relationships:", error.message, error.stack);
+      throw error;
+    }
+
+    // Sync database (use migrations in production)
+    console.log("Syncing database");
+    await sequelize.sync({ alter: true });
+    console.log("Database synchronized successfully");
+
+    initialized = true; // Prevent re-initialization in Lambda
   }
-};
 
-module.exports = { Client, Exam, syncDatabase };
+  return { sequelize, ...models };
+}
+
+module.exports = { setupDatabase };

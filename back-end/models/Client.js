@@ -1,13 +1,34 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database");
 
-const Client = sequelize.define("Client", {
-  cin: { type: DataTypes.INTEGER, primaryKey: true },
-  nom: DataTypes.STRING,
-  prenom: DataTypes.STRING,
-  dateNaissance: DataTypes.DATEONLY,
-  sexe: DataTypes.STRING,
-  telephone: DataTypes.STRING,
-});
+module.exports = (sequelize) => {
+  const Client = sequelize.define(
+    "Client",
+    {
+      cin: {
+        type: DataTypes.INTEGER,
+        primaryKey: true,
+      },
+      nom: {
+        type: DataTypes.STRING,
+      },
+      prenom: {
+        type: DataTypes.STRING,
+      },
+      dateNaissance: {
+        type: DataTypes.DATEONLY,
+      },
+      sexe: {
+        type: DataTypes.STRING,
+      },
+      telephone: {
+        type: DataTypes.STRING,
+      },
+    },
+    {
+      tableName: "clients",
+      timestamps: true,
+    }
+  );
 
-module.exports = Client;
+  return Client;
+};

@@ -1,60 +1,91 @@
-const express = require("express");
-const router = express.Router();
-const { Exam, Client } = require("../models"); 
+const { setupDatabase } = require("../models/index");
 
-// ✅ Get all examens (with client details)
-router.get("/", async (req, res) => {
+async function handleExamens(event) {
+  console.log("Starting handleExamens");
+  const { httpMethod, pathParameters, body } = event;
+  const { Exam, Client } = await setupDatabase();
+
   try {
-    const examens = await Exam.findAll({ include: Client });
-    res.json(examens);
+    const requestBody = body ? JSON.parse(body) : {};
+
+    switch (httpMethod) {
+      case "GET":
+        if (pathParameters && pathParameters.id) {
+          console.log(`Fetching exam with ID: ${pathParameters.id}`);
+          const exam = await Exam.findByPk(pathParameters.id, {
+            include: { model: Client, as: "client" },
+          });
+          if (!exam) {
+            console.log("Exam not found");
+            return { statusCode: 404, body: JSON.stringify({ error: "Examen non trouvé" }) };
+          }
+          console.log("Exam retrieved successfully");
+          return { statusCode: 200, body: JSON.stringify(exam) };
+        } else {
+          console.log("Fetching all exams");
+          const exams = await Exam.findAll({
+            include: { model: Client, as: "client" },
+          });
+          console.log(`Retrieved ${exams.length} exams`);
+          return { statusCode: 200, body: JSON.stringify(exams) };
+        }
+
+      case "POST":
+        console.log("Creating new exam");
+        const { clientCin } = requestBody;
+        if (!clientCin) {
+          console.log("clientCin is required");
+          return { statusCode: 400, body: JSON.stringify({ error: "Le champ clientCin est requis" }) };
+        }
+        const client = await Client.findOne({ where: { cin: clientCin } });
+        if (!client) {
+          console.log("Client not found for exam");
+          return { statusCode: 400, body: JSON.stringify({ error: "Client introuvable" }) };
+        }
+        const newExam = await Exam.create(requestBody);
+        console.log("Exam created successfully");
+        return { statusCode: 201, body: JSON.stringify(newExam) };
+
+      case "PUT":
+        if (!pathParameters || !pathParameters.id) {
+          console.log("ID required in URL");
+          return { statusCode: 400, body: JSON.stringify({ error: "ID requis dans l'URL" }) };
+        }
+        console.log(`Updating exam with ID: ${pathParameters.id}`);
+        const [updated] = await Exam.update(requestBody, {
+          where: { id: pathParameters.id },
+          returning: true,
+        });
+        if (!updated) {
+          console.log("Exam not found for update");
+          return { statusCode: 404, body: JSON.stringify({ error: "Examen non trouvé" }) };
+        }
+        const updatedExam = await Exam.findByPk(pathParameters.id);
+        console.log("Exam updated successfully");
+        return { statusCode: 200, body: JSON.stringify({ message: "Examen mis à jour avec succès", exam: updatedExam }) };
+
+      case "DELETE":
+        if (!pathParameters || !pathParameters.id) {
+          console.log("ID required in URL");
+          return { statusCode: 400, body: JSON.stringify({ error: "ID requis dans l'URL" }) };
+        }
+        console.log(`Deleting exam with ID: ${pathParameters.id}`);
+        const deleted = await Exam.destroy({ where: { id: pathParameters.id } });
+        if (!deleted) {
+          console.log("Exam not found for deletion");
+          return { statusCode: 404, body: JSON.stringify({ error: "Examen non trouvé" }) };
+        }
+        console.log("Exam deleted successfully");
+        return { statusCode: 200, body: JSON.stringify({ message: "Examen supprimé avec succès" }) };
+
+      default:
+        console.log("Method not allowed:", httpMethod);
+        return { statusCode: 405, body: JSON.stringify({ error: "Méthode non autorisée" }) };
+    }
   } catch (error) {
-    res.status(500).json({ error: "Erreur lors de la récupération des examens" });
+    console.error("Error in examens handler:", error.message);
+    return { statusCode: 500, body: JSON.stringify({ error: "Erreur lors du traitement de la requête examens" }) };
   }
-});
+}
 
-// ✅ Get one examen by ID
-router.get("/:id", async (req, res) => {
-  try {
-    const examen = await Exam.findByPk(req.params.id, { include: Client });
-    if (!examen) return res.status(404).json({ error: "Examen non trouvé" });
-    res.json(examen);
-  } catch (error) {
-    res.status(500).json({ error: "Erreur lors de la récupération de l'examen" });
-  }
-});
-
-// ✅ Create a new examen
-router.post("/", async (req, res) => {
-  try {
-    // Check if client exists
-    const client = await Client.findOne({ where: { cin: req.body.clientCin } });
-    if (!client) return res.status(400).json({ error: "Client introuvable" });
-
-    const newExamen = await Exam.create(req.body);
-    res.status(201).json(newExamen);
-  } catch (error) {
-    res.status(400).json({ error: "Erreur lors de la création de l'examen" });
-  }
-});
-
-// ✅ Update an examen by ID
-router.put("/:id", async (req, res) => {
-  try {
-    const updatedExamen = await Exam.update(req.body, { where: { id: req.params.id } });
-    res.json({ message: "Examen mis à jour avec succès" });
-  } catch (error) {
-    res.status(400).json({ error: "Erreur lors de la mise à jour de l'examen" });
-  }
-});
-
-// ✅ Delete an examen by ID
-router.delete("/:id", async (req, res) => {
-  try {
-    await Exam.destroy({ where: { id: req.params.id } });
-    res.json({ message: "Examen supprimé avec succès" });
-  } catch (error) {
-    res.status(400).json({ error: "Erreur lors de la suppression de l'examen" });
-  }
-});
-
-module.exports = router;
+module.exports = { handleExamens };
