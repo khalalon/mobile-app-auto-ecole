@@ -2,13 +2,19 @@ const { setupDatabase } = require("../models/index");
 
 async function handleExamens(event) {
   console.log("Starting handleExamens");
-  const { httpMethod, pathParameters, body } = event;
+  const { pathParameters, body } = event;
+  const httpMethod = event?.requestContext?.http?.method; // Use nested method for HTTP API v2
   const { Exam, Client } = await setupDatabase();
+
+  if (!httpMethod) {
+    console.log("No HTTP method provided in event:", JSON.stringify(event));
+    return { statusCode: 400, body: JSON.stringify({ error: "Méthode HTTP requise" }) };
+  }
 
   try {
     const requestBody = body ? JSON.parse(body) : {};
 
-    switch (httpMethod) {
+    switch (httpMethod.toUpperCase()) {
       case "GET":
         if (pathParameters && pathParameters.id) {
           console.log(`Fetching exam with ID: ${pathParameters.id}`);
@@ -84,7 +90,7 @@ async function handleExamens(event) {
     }
   } catch (error) {
     console.error("Error in examens handler:", error.message);
-    return { statusCode: 500, body: JSON.stringify({ error: "Erreur lors du traitement de la requête examens" }) };
+    return { statusCode: 500, body: JSON.stringify({ error: "Erreur lors du traitement de la requête examens", details: error.message }) };
   }
 }
 

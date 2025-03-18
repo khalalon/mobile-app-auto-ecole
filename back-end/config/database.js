@@ -17,7 +17,6 @@ async function getDatabaseConfig() {
     console.log(`Secret retrieved successfully in ${Date.now() - startTime} ms`);
     const config = JSON.parse(secret.SecretString);
     
-    // Split PG_HOST if it includes a port
     let host = config.PG_HOST;
     let port = config.PG_PORT || 5432;
     if (host.includes(":")) {
@@ -49,7 +48,13 @@ async function initializeDatabase() {
           host: dbConfig.PG_HOST,
           port: dbConfig.PG_PORT,
           dialect: "postgres",
-          logging: console.log, // Enable logging for debugging
+          dialectOptions: {
+            ssl: {
+              require: true, // Enforce SSL
+              rejectUnauthorized: false // Use this for self-signed certs (common in dev); set to true in prod with proper CA
+            }
+          },
+          logging: console.log,
           pool: { max: 5, min: 0, acquire: 30000, idle: 10000 },
         });
         try {

@@ -5,8 +5,21 @@ exports.handler = async (event) => {
   console.log("Received event:", JSON.stringify(event));
 
   const path = event?.rawPath || "";
-  const stage = "/prod"; // Adjust this based on your API Gateway stage
+  const httpMethod = event?.requestContext?.http?.method; // Fix: Get method from nested structure
+  const stage = "/prod";
   const relativePath = path.replace(stage, "");
+
+  if (!httpMethod) {
+    console.error("HTTP method is undefined in event:", JSON.stringify(event));
+    return {
+      statusCode: 400,
+      body: JSON.stringify({ error: "Méthode HTTP requise" }),
+      headers: {
+        "Content-Type": "application/json",
+        "Access-Control-Allow-Origin": "*",
+      },
+    };
+  }
 
   try {
     let response;
@@ -41,3 +54,5 @@ exports.handler = async (event) => {
     };
   }
 };
+
+module.exports = { handler: exports.handler };

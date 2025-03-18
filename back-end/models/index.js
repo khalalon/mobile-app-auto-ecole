@@ -30,12 +30,12 @@ async function setupDatabase() {
       throw error;
     }
 
-    // Sync database (use migrations in production)
+    // Sync database
     console.log("Syncing database");
     await sequelize.sync({ alter: true });
     console.log("Database synchronized successfully");
 
-    initialized = true; // Prevent re-initialization in Lambda
+    initialized = true;
   }
 
   return { sequelize, ...models };

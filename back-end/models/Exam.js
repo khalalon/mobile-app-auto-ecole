@@ -1,6 +1,4 @@
 const { DataTypes } = require("sequelize");
-const sequelize = require("../config/database"); // Incorrect import
-const Client = require("./Client"); // Importing function, not model instance
 
 module.exports = (sequelize) => {
   const Examen = sequelize.define("Examen", {
@@ -10,14 +8,8 @@ module.exports = (sequelize) => {
       primaryKey: true,
     },
     clientCin: {
-      type: DataTypes.STRING, // Type mismatch with Client.cin (INTEGER)
+      type: DataTypes.INTEGER, 
       allowNull: false,
-      references: {
-        model: Client, // References function, not model
-        key: "cin",
-      },
-      onUpdate: "CASCADE",
-      onDelete: "CASCADE",
     },
     clientNom: {
       type: DataTypes.STRING,
@@ -41,9 +33,5 @@ module.exports = (sequelize) => {
     },
   });
 
-  // Define relationship (outside function scope)
-  Client.hasMany(Examen, { foreignKey: "clientCin" });
-  Examen.belongsTo(Client, { foreignKey: "clientCin" });
-
-  module.exports = Examen; // Syntax error: reassigns export
+  return Examen;
 };
