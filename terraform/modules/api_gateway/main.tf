@@ -1,3 +1,5 @@
+# main.tf (or your Terraform file)
+
 resource "aws_apigatewayv2_api" "api" {
   name          = "MyHttpAPI"
   protocol_type = "HTTP"
@@ -35,15 +37,60 @@ resource "aws_apigatewayv2_stage" "prod" {
   }
 }
 
+# Existing Examens Routes
 resource "aws_apigatewayv2_route" "examens" {
   api_id    = aws_apigatewayv2_api.api.id
   route_key = "ANY /examens"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
+resource "aws_apigatewayv2_route" "examens_put" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "PUT /examens/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "examens_delete" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "DELETE /examens/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+# Existing Clients Routes
 resource "aws_apigatewayv2_route" "clients" {
   api_id    = aws_apigatewayv2_api.api.id
   route_key = "ANY /clients"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "clients_put" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "PUT /clients/{cin}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "clients_delete" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "DELETE /clients/{cin}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+# New Seances Routes
+resource "aws_apigatewayv2_route" "seances" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "ANY /seances"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "seances_put" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "PUT /seances/{id}"
+  target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
+}
+
+resource "aws_apigatewayv2_route" "seances_delete" {
+  api_id    = aws_apigatewayv2_api.api.id
+  route_key = "DELETE /seances/{id}"
   target    = "integrations/${aws_apigatewayv2_integration.lambda.id}"
 }
 
